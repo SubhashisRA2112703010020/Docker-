@@ -1,0 +1,46 @@
+FROM ubuntu : latest 
+# Update Ubuntu packages 
+RUN apt-get update -y && apt-get upgrade -y 
+# Install Python, Java, MySQL, and Nginx 
+RUN apt-get install -y python3 python3-pip openjdk-11-jdk mysql-server nginx 
+# Expose port 80 for Nginx 
+EXPOSE 80 
+# Start Nginx server 
+CMD ["nginx", "-g", "daemon off;"] 
+To build the Docker image, save the Dockerfile in a directory and run the following command in that directory: docker build -t myubuntu . 
+This will build a Docker image with the name "myubuntu". Once the image is built, you can run a container based on this image using the following command: 
+ 
+docker run -d -p 80:80 myubuntu 
+ 
+TASK 3 
+ 
+version: '3' 
+ 
+services: 
+ 
+  db: 
+    image: mysql:5.7     volumes: 
+-	db_data:/var/lib/mysql     restart: always     environment: 
+      MYSQL_ROOT_PASSWORD: examplepassword 
+      MYSQL_DATABASE: wordpress 
+      MYSQL_USER: wordpress 
+      MYSQL_PASSWORD: wordpress 
+ 
+  wordpress:     depends_on: 
+-	db 
+    image: wordpress:latest 
+    ports:       - "8000:80"     restart: always     environment: 
+      WORDPRESS_DB_HOST: db:3306 
+      WORDPRESS_DB_USER: wordpress 
+      WORDPRESS_DB_PASSWORD: wordpress       WORDPRESS_DB_NAME: wordpress 
+    volumes: 
+-	./wp-content:/var/www/html/wp-content 
+ 
+volumes:   db_data: 
+This file defines two services, db and wordpress. The db service uses the mysql:5.7 image, creates a volume to store the MySQL data, and sets environment variables for the root password and the WordPress database and user details. 
+ 
+The wordpress service uses the wordpress:latest image, maps port 8000 to port 80 on the container, and sets environment variables to connect to the MySQL database. It also creates a volume to persist the WordPress content in the wp-content directory. 
+ 
+To deploy the services, run the following command in the same directory as the docker-compose.yml file: 
+ 
+Copy code docker-compose up -d 
